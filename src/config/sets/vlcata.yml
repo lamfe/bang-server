@@ -87,7 +87,7 @@ character:
     image: 29_libor
     effects:
       - max_usages(1)
-      - bang player alive reachable notself | hand
+      - bang player alive reachable notself
 
 # 12. ELIS - Discard a non-spades hand card to play Missed! works!
   - name: ELIS
@@ -96,36 +96,101 @@ character:
       - discard card self | hand not_spades
       - missed
 
-  # GROUP 3: NOT TESTING
-  # - name: HOROUS
-  #   image: 29_horous
-  # - name: VUDCE
-  #   image: 29_vudce
-  # - name: JEDNORUCKA_RIZEK
-  #   image: 29_jednorucka_rizek
-  # - name: PETUNA
-  #   image: 29_petuna
-  # - name: SMIG
-  #   image: 29_smig
-  # - name: CYRIL
-  #   image: 29_cyril
-  # - name: VENA
-  #   image: 29_vena
-  # - name: HELENA
-  #   image: 29_helena
-  # - name: SIMI
-  #   image: 29_simi
-  # - name: EL_BAGITO
-  #   image: 29_el_bagito
-  # - name: KRECEK
-  #   image: 29_krecek
-  # - name: EDIE
-  #   image: 29_edie
-  # - name: KOTEL
-  #   image: 29_kotel
-  # - name: TERMIT
-  #   image: 29_termit
-  # - name: SITEJ
-  #   image: 29_sitej
-  # - name: BUDHA
-  #   image: 29_budha
+  # GROUP 3
+  # 13. HOROUS - At the end of his turn, draw!: if black, treated as eliminated (coffin-style) until his next turn comes up
+  - name: HOROUS
+    image: 29_horous
+    equip:
+      - horous
+
+  # 14. VUDCE - Draw check like the Helena Zontero event: on red, every other player discards a random card
+  - name: VUDCE
+    image: 29_vudce
+    equip:
+      - vudce
+
+  # 15. JEDNORUCKA_RIZEK - Survives his first death: sits out (coffin-style) and revives at the start of his next turn with 3 HP and 3 cards
+  - name: JEDNORUCKA_RIZEK
+    image: 29_jednorucka_rizek
+    equip:
+      - jednorucka_rizek
+
+  # 16. PETUNA - At the end of his turn, draw!: spade loses 1 HP, red grants an extra turn (max 1x per round)
+  - name: PETUNA
+    image: 29_petuna
+    equip:
+      - petuna
+
+  # 17. SMIG - Once per turn, discard a Bang! card to destroy a table card, unless the owner plays Missed!
+  - name: SMIG
+    image: 29_smig
+    effects:
+      - max_usages(1)
+      - discard card self | hand bangcard
+      - smig_destroy card | table
+
+  # 18. CYRIL - Draws a card whenever he is targeted by a Bang! card, before it resolves
+  - name: CYRIL
+    image: 29_cyril
+    equip:
+      - cyril
+
+  # 19. VENA - Whenever he takes damage, draw!: hearts or a 2 negates the life loss
+  - name: VENA
+    image: 29_vena
+    equip:
+      - vena
+
+  # 20. HELENA - Same draw-check-triggered role reshuffle as the Helena Zontero event
+  - name: HELENA
+    image: 29_helena
+    equip:
+      - helena
+
+  # 21. SIMI - Becomes Sheriff (roles reshuffled among everyone else) and is immune to Dynamite's damage
+  - name: SIMI
+    image: 29_simi
+    equip:
+      - simi_dynamite_master
+
+  # 22. EL_BAGITO - Draws as many cards as another player draws from Stagecoach, Wells Fargo or Pony Express
+  - name: EL_BAGITO
+    image: 29_el_bagito
+    equip:
+      - el_bagito
+
+  # 23. KRECEK - Draws a card whenever he equips a weapon; other players cannot keep a longer-range weapon than his
+  - name: KRECEK
+    image: 29_krecek
+    equip:
+      - krecek
+
+  # 24. EDIE - Whenever a card is stolen/destroyed from her, draw!: if not a Spade, the attacker discards a random card
+  - name: EDIE
+    image: 29_edie
+    equip:
+      - edie
+
+  # 25. KOTEL - Weapons +1 range and +1 Bang! per turn, Barrel draws 2 on success, Map reveals 3 instead of 2
+  - name: KOTEL
+    image: 29_kotel
+    equip:
+      - kotel
+
+  # 26. TERMIT - +1 starting card if seated last/next-to-last, +2 cards from General Store, +1 hand limit below 3 HP
+  - name: TERMIT
+    image: 29_termit
+    equip:
+      - termit
+
+  # 27. SITEJ - At the end of his turn, discards his whole hand and draws that many cards + 1
+  - name: SITEJ
+    image: 29_sitej
+    equip:
+      - sitej
+
+  # 28. BUDHA - Whenever he plays an alcohol card, flips 3 cards: alcohol cards heal him, others are discarded
+  - name: BUDHA
+    image: 29_budha
+    equip:
+      - budha

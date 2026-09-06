@@ -4,8 +4,10 @@
 #include "cards/card_effect.h"
 
 namespace banggame {
-    struct effect_helena_ability {};
-    DEFINE_EFFECT(helena_ability, effect_helena_ability)
+    struct equip_helena : event_equip {
+        void on_enable(card_ptr target_card, player_ptr target);
+    };
+    DEFINE_EQUIP(helena, equip_helena)
 }
 
 #endif

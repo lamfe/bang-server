@@ -1,10 +1,11 @@
-#ifndef __VLCATA_HELENA_H__
-#define __VLCATA_HELENA_H__
+#include "helena.h"
 
-#include "cards/card_effect.h"
+#include "effects/wildwestshow/helena_zontero.h"
 
 namespace banggame {
-   
-}
 
-#endif
+    void equip_helena::on_enable(card_ptr target_card, player_ptr target) {
+        equip_helena_zontero{}.on_enable(target_card, target);
+    }
+
+}

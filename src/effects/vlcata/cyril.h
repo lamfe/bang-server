@@ -1,4 +1,3 @@
-// cyril.h
 #ifndef __VLCATA_CYRIL_H__
 #define __VLCATA_CYRIL_H__
 
@@ -10,4 +9,5 @@ namespace banggame {
     };
     DEFINE_EQUIP(cyril, equip_cyril)
 }
+
 #endif

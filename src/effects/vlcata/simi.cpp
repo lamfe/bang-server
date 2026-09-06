@@ -1,5 +1,55 @@
 #include "simi.h"
 
+#include "cards/game_enums.h"
+#include "effects/base/damage.h"
+
+#include "game/game_table.h"
+#include "game/game_options.h"
+#include "game/request_timer.h"
+
 namespace banggame {
-   
+
+    struct request_simi_reshuffle : request_base, request_timer {
+        request_simi_reshuffle(card_ptr origin_card, player_ptr origin)
+            : request_base(origin_card, origin, nullptr) {}
+
+        void on_update() override {
+            set_duration(origin->m_game->m_options.auto_resolve_timer);
+        }
+
+        void on_finished() override {
+            pop_request();
+
+            auto other_players = rv::filter(origin->m_game->m_players, [origin = origin](player_ptr p) {
+                return p->alive() && p != origin;
+            }) | rn::to<std::vector>();
+
+            auto roles = other_players | rv::transform(&player::get_base_role) | rn::to<std::vector>();
+            rn::shuffle(roles, origin->m_game->rng);
+
+            origin->hide_role();
+            origin->set_role(player_role::sheriff);
+
+            for (auto [p, role] : rv::zip(other_players, roles)) {
+                p->hide_role();
+                p->set_role(role);
+            }
+        }
+
+        game_string status_text(player_ptr owner) const override {
+            return "STATUS_ROLES_SHUFFLED";
+        }
+    };
+
+    void equip_simi_dynamite_master::on_enable(card_ptr target_card, player_ptr target) {
+        target->m_game->add_listener<event_type::on_hit>(target_card, [target, target_card](card_ptr origin_card, player_ptr origin, player_ptr hit_target, int damage, effect_flags flags) {
+            if (hit_target == target && damage > 0 && origin_card && origin_card->name == "DYNAMITE") {
+                target_card->flash_card();
+                target->heal(target_card, nullptr, damage);
+            }
+        });
+
+        target->m_game->queue_request<request_simi_reshuffle>(target_card, target);
+    }
+
 }
