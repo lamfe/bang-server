@@ -26,12 +26,14 @@ character:
       - discard cards(2) self
       - heal player alive
  
-  # 4. TERKA_P - Bang  can heal and can discard 3 cards to heal 1 life (Sid Ketchup like)
+  # 4. TERKA_P - Bang can heal (she may flip any hit she deals into a heal) and can discard 3 cards to heal 1 life (Sid Ketchum like)
   - name: TERKA_P
     image: 29_terka_p
     responses:
       - discard cards(3) self | hand
       - heal
+    equip:
+      - terka_p_bang
 
 
   # 5. JULKA - 9 HP, starts with 5 cards, loses 1 HP at the end of turn if HP > 3

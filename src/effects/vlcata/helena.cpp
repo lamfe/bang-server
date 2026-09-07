@@ -10,18 +10,30 @@
 namespace banggame {
 
     void effect_helena_ability::on_play(card_ptr origin_card, player_ptr origin, player_ptr target) {
+        card_ptr named = random_element(origin->m_game->m_deck, origin->m_game->rng);
+
+        auto it = rn::find(target->m_hand, named->name, &card::name);
+        origin->m_game->add_log("LOG_CARD_HAS_EFFECT", origin_card);
+
+        if (it == target->m_hand.end()) {
+            target->reveal_hand();
+            return;
+        }
+
+        card_ptr chosen_card = *it;
+
         game_ptr g = target->m_game;
         player_ptr old_playing = g->m_playing;
         g->m_playing = target;
 
-        auto hand_cards = generate_playable_cards_list(target)
-            | rv::filter([target](const playable_card_info &info) {
-                return info.card->owner == target && info.card->pocket == pocket_type::player_hand;
+        auto matches = generate_playable_cards_list(target)
+            | rv::filter([chosen_card](const playable_card_info &info) {
+                return info.card == chosen_card;
             })
             | rn::to<std::vector>();
 
-        if (!hand_cards.empty()) {
-            const playable_card_info &chosen = random_element(hand_cards, g->rng);
+        if (!matches.empty()) {
+            const playable_card_info &chosen = matches.front();
 
             game_action action{
                 .card = chosen.card,
@@ -44,7 +56,6 @@ namespace banggame {
             }
             action.bypass_prompt = true;
 
-            origin->m_game->add_log("LOG_CARD_HAS_EFFECT", origin_card);
             verify_and_play(target, action);
         }
 
