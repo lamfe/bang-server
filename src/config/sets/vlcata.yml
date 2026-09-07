@@ -103,11 +103,12 @@ character:
     equip:
       - horous
 
-  # 14. VUDCE - Draw check like the Helena Zontero event: on red, every other player discards a random card
+  # 14. VUDCE - Once per turn, choose a player: they discard a random card from hand
   - name: VUDCE
     image: 29_vudce
-    equip:
-      - vudce
+    effects:
+      - max_usages(1)
+      - vudce_ability player not_empty_hand notself
 
   # 15. JEDNORUCKA_RIZEK - Survives his first death: sits out (coffin-style) and revives at the start of his next turn with 3 HP and 3 cards
   - name: JEDNORUCKA_RIZEK
@@ -141,11 +142,12 @@ character:
     equip:
       - vena
 
-  # 20. HELENA - Same draw-check-triggered role reshuffle as the Helena Zontero event
+  # 20. HELENA - Once per turn, choose a player: a random card from their hand is forced into play
   - name: HELENA
     image: 29_helena
-    equip:
-      - helena
+    effects:
+      - max_usages(1)
+      - helena_ability player not_empty_hand notself
 
   # 21. SIMI - Becomes Sheriff (roles reshuffled among everyone else) and is immune to Dynamite's damage
   - name: SIMI
@@ -171,7 +173,8 @@ character:
     equip:
       - edie
 
-  # 25. KOTEL - Weapons +1 range and +1 Bang! per turn, Barrel draws 2 on success, Map reveals 3 instead of 2
+  # 25. KOTEL - Weapons +1 range/+1 Bang! per turn, Mustang/Hideout +1 distance, Scope/Binocular +1 range,
+  #     Barrel draws 2 on success, Map reveals 3 instead of 2
   - name: KOTEL
     image: 29_kotel
     equip:

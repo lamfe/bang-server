@@ -16,9 +16,28 @@ namespace banggame {
         return false;
     }
 
+    static bool has_mustang(player_ptr p) {
+        for (card_ptr c : p->m_table) {
+            if (c->name == "MUSTANG" || c->name == "HIDEOUT") return true;
+        }
+        return false;
+    }
+
+    static bool has_scope(player_ptr p) {
+        for (card_ptr c : p->m_table) {
+            if (c->name == "SCOPE" || c->name == "BINOCULAR") return true;
+        }
+        return false;
+    }
+
     void equip_kotel::on_enable(card_ptr target_card, player_ptr target) {
         target->m_game->add_listener<event_type::count_range_mod>({target_card, -10}, [target](const_player_ptr origin, range_mod_type type, int &value) {
-            if (origin == target && type == range_mod_type::weapon_range && has_weapon(target)) {
+            if (origin != target) return;
+            if (type == range_mod_type::weapon_range && has_weapon(target)) {
+                ++value;
+            } else if (type == range_mod_type::distance_mod && has_mustang(target)) {
+                ++value;
+            } else if (type == range_mod_type::range_mod && has_scope(target)) {
                 ++value;
             }
         });
