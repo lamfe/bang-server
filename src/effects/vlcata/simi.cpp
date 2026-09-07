@@ -7,6 +7,8 @@
 #include "game/game_options.h"
 #include "game/request_timer.h"
 
+#include "utils/range_utils.h"
+
 namespace banggame {
 
     struct request_simi_reshuffle : request_base, request_timer {
@@ -50,6 +52,19 @@ namespace banggame {
         });
 
         target->m_game->queue_request<request_simi_reshuffle>(target_card, target);
+    }
+
+    bool effect_simi_take_dynamite::can_play(card_ptr origin_card, player_ptr origin) {
+        return rn::any_of(origin->m_game->m_discards, [](card_ptr c) { return c->name == "DYNAMITE"; });
+    }
+
+    void effect_simi_take_dynamite::on_play(card_ptr origin_card, player_ptr origin) {
+        auto it = rn::find_if(origin->m_game->m_discards, [](card_ptr c) { return c->name == "DYNAMITE"; });
+        if (it != origin->m_game->m_discards.end()) {
+            card_ptr dynamite = *it;
+            origin->m_game->add_log("LOG_EQUIPPED_CARD", dynamite, origin);
+            origin->equip_card(dynamite);
+        }
     }
 
 }

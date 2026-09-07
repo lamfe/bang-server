@@ -1,5 +1,6 @@
 target_sources(bangserver PRIVATE
     ruleset.cpp
+    anezka.cpp
     horous.cpp
     miki.cpp
     martin.cpp

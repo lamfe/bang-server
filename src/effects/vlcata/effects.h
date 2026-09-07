@@ -2,6 +2,7 @@
 #define __VLCATA_EFFECTS_H__
 
 #include "ruleset.h"
+#include "anezka.h"
 #include "horous.h"
 #include "miki.h"
 #include "martin.h"

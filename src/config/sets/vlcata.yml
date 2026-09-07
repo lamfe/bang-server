@@ -1,5 +1,5 @@
 character:
-  # 1. BEJCEK - Up to 3 times per turn, discard a card to draw 1 card, works + ability that if played that blue card with bang dmg +1 card he gets a card 
+  # 1. BEJCEK - Up to 3 times per turn, discard a card to draw 1 card; whenever any player plays a Bounty card, he draws a card
   - name: BEJCEK
     image: 29_bejcek
     rulesets: [vlcata]
@@ -7,24 +7,27 @@ character:
       - max_usages(3)
       - discard card self | hand
       - draw(1)
+    equip:
+      - bejcek
 
-  # 2. PATKA - Once per turn, discard a card with efect on all players (Saloon etc) to draw 2 cards, Once discard X card draw X-1 card
+  # 2. PATKA - Once per turn: if the first card he discards has an effect on all players (Saloon etc), he draws 2;
+  #    otherwise he may keep discarding and draws (X-1) cards for the X he discarded
   - name: PATKA
     image: 29_patka
     rulesets: [vlcata]
     effects:
       - max_usages(1)
-      - discard card self | hand
-      - draw(2)
+      - patka_discard
 
-  # 3. ANEZKA - Once per turn, discard 2 cards to heal any alive player (another player only 1 times her no limit), works slightly
+  # 3. ANEZKA - Discard 2 cards to heal any alive player, unlimited times on herself, but each other player only once
   - name: ANEZKA
     image: 29_anezka
     rulesets: [vlcata]
+    equip:
+      - anezka
     effects:
-      - max_usages(1)
       - discard cards(2) self
-      - heal player alive
+      - anezka_heal player alive
  
   # 4. TERKA_P - Bang can heal (she may flip any hit she deals into a heal) and can discard 3 cards to heal 1 life (Sid Ketchum like)
   - name: TERKA_P
@@ -151,6 +154,10 @@ character:
     image: 29_simi
     equip:
       - simi_dynamite_master
+    effects:
+      - max_usages(1)
+      - discard cards(2) self | hand
+      - simi_take_dynamite
 
   # 22. EL_BAGITO - Draws as many cards as another player draws from Stagecoach, Wells Fargo or Pony Express
   - name: EL_BAGITO

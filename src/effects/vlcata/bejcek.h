@@ -4,8 +4,10 @@
 #include "cards/card_effect.h"
 
 namespace banggame {
-    struct bejcek_passive {};
-    DEFINE_EQUIP(bejcek_passive, bejcek_passive)
+    struct equip_bejcek : event_equip {
+        void on_enable(card_ptr target_card, player_ptr target);
+    };
+    DEFINE_EQUIP(bejcek, equip_bejcek)
 }
 
 #endif
