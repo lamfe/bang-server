@@ -10,20 +10,26 @@
 
 namespace banggame {
 
-    static card_ptr make_representative(player_ptr origin, std::string_view name) {
-        auto it = rn::find_if(bang_cards.deck, [&](const card_data &d) { return d.name == name; });
-        if (it == bang_cards.deck.end()) return nullptr;
-        card_ptr c = origin->m_game->add_card(*it);
+    static card_ptr make_representative(player_ptr origin, const card_data &data) {
+        card_ptr c = origin->m_game->add_card(data);
         origin->m_game->add_cards_to({c}, pocket_type::selection, nullptr, card_visibility::shown);
         return c;
     }
 
+    static card_ptr make_representative_by_name(player_ptr origin, std::string_view name) {
+        auto it = rn::find_if(bang_cards.deck, [&](const card_data &d) { return d.name == name; });
+        if (it == bang_cards.deck.end()) return nullptr;
+        return make_representative(origin, *it);
+    }
+
+    // Every choosable card is a freshly-spawned representative sitting in the shared
+    // selection pool, the same way Emporio (General Store) presents its choices.
     static card_list build_nameable_cards(player_ptr origin, card_list &dummies) {
         static constexpr std::string_view common_names[] = { "BANG", "MISSED", "BEER", "DUEL", "INDIANS", "PANIC", "CAT_BALOU" };
 
         card_list choices;
         for (std::string_view name : common_names) {
-            if (card_ptr c = make_representative(origin, name)) {
+            if (card_ptr c = make_representative_by_name(origin, name)) {
                 choices.push_back(c);
                 dummies.push_back(c);
             }
@@ -31,7 +37,9 @@ namespace banggame {
         for (player_ptr p : origin->m_game->m_players) {
             for (card_ptr c : p->m_table) {
                 if (c->is_green() || c->has_tag(tag_type::weapon)) {
-                    choices.push_back(c);
+                    card_ptr rep = make_representative(origin, *c);
+                    choices.push_back(rep);
+                    dummies.push_back(rep);
                 }
             }
         }
