@@ -122,12 +122,11 @@ character:
     tags:
       - max_hp(3)
 
-  # 16. PETUNA - Once during his turn, he may draw!: spade loses 1 HP, red grants an extra turn (max 1x per round)
+  # 16. PETUNA - At the end of his turn, a dialog asks if he wants to draw!: spade loses 1 HP, red grants an extra turn (max 1x per round)
   - name: PETUNA
     image: 29_petuna
-    effects:
-      - max_usages(1)
-      - petuna_check
+    equip:
+      - petuna
 
   # 17. SMIG - Once per turn, discard a Bang! card to destroy a table card, unless the owner plays Missed!
   - name: SMIG
