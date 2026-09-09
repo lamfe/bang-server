@@ -14,7 +14,7 @@ namespace banggame {
         auto it = rn::find_if(bang_cards.deck, [&](const card_data &d) { return d.name == name; });
         if (it == bang_cards.deck.end()) return nullptr;
         card_ptr c = origin->m_game->add_card(*it);
-        c->move_to(pocket_type::selection, nullptr, card_visibility::shown);
+        origin->m_game->add_cards_to({c}, pocket_type::selection, nullptr, card_visibility::shown);
         return c;
     }
 
