@@ -58,12 +58,14 @@ character:
       - none random_if_hand_card notself | hand
     mth_effect: flint_westwood(1,1)
 
-  # 7. VERCA - Discard a green card to draw 2 cards and green cards are already active
+  # 7. VERCA - Once per turn, discard a green-bordered card to draw 2 cards; green cards are already active
   - name: VERCA
     image: 29_verca
+    equip:
+      - verca_instant_green
     effects:
-      - discard card self | hand
-      - draw(2)
+      - max_usages(1)
+      - verca_discard card self | hand
 
   # 8. MARTIN - At the end of turn, draw 1 extra card if not played Bang
   - name: MARTIN
@@ -88,6 +90,8 @@ character:
     image: 29_libor
     equip:
       - libor
+    tags:
+      - max_hp(5)
 
 # 12. ELIS - Discard a non-spades hand card to play Missed! works!
   - name: ELIS
@@ -103,7 +107,7 @@ character:
     equip:
       - horous
 
-  # 14. VUDCE - Once per turn, choose a player: they discard a random card from hand
+  # 14. VUDCE - Once per turn, choose a player and name a card from a curated list: if they have it, they discard it, else reveal hand
   - name: VUDCE
     image: 29_vudce
     effects:
@@ -115,12 +119,15 @@ character:
     image: 29_jednorucka_rizek
     equip:
       - jednorucka_rizek
+    tags:
+      - max_hp(3)
 
-  # 16. PETUNA - At the end of his turn, draw!: spade loses 1 HP, red grants an extra turn (max 1x per round)
+  # 16. PETUNA - Once during his turn, he may draw!: spade loses 1 HP, red grants an extra turn (max 1x per round)
   - name: PETUNA
     image: 29_petuna
-    equip:
-      - petuna
+    effects:
+      - max_usages(1)
+      - petuna_check
 
   # 17. SMIG - Once per turn, discard a Bang! card to destroy a table card, unless the owner plays Missed!
   - name: SMIG
@@ -142,7 +149,7 @@ character:
     equip:
       - vena
 
-  # 20. HELENA - Once per turn, choose a player: a random card from their hand is forced into play
+  # 20. HELENA - Once per turn, choose a player and name a card from a curated list: if they have it, it's forced into play, else reveal hand
   - name: HELENA
     image: 29_helena
     effects:
@@ -189,6 +196,8 @@ character:
     image: 29_termit
     equip:
       - termit
+    tags:
+      - max_hp(5)
 
   # 27. SITEJ - At the end of his turn, discards his whole hand and draws that many cards + 1
   - name: SITEJ
@@ -196,7 +205,7 @@ character:
     equip:
       - sitej
 
-  # 28. BUDHA - Whenever he plays an alcohol card, flips 3 cards: alcohol cards heal him, others are discarded
+  # 28. BUDHA - Whenever he plays an alcohol card, reveals 3 (like Kit Carlson) into his hand to play at will; alcohol chains another 3
   - name: BUDHA
     image: 29_budha
     equip:

@@ -11,4 +11,16 @@ namespace banggame {
                 }
             });
     }
+
+    game_string effect_verca_discard::get_error(card_ptr origin_card, player_ptr origin, card_ptr target_card) {
+        if (!target_card->is_green()) {
+            return "ERROR_INVALID_CARD";
+        }
+        return {};
+    }
+
+    void effect_verca_discard::on_play(card_ptr origin_card, player_ptr origin, card_ptr target_card) {
+        origin->discard_card(target_card);
+        origin->draw_card(2, origin_card);
+    }
 }

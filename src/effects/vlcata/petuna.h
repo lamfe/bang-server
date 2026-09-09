@@ -4,10 +4,13 @@
 #include "cards/card_effect.h"
 
 namespace banggame {
-    struct equip_petuna : event_equip {
-        void on_enable(card_ptr target_card, player_ptr target);
+
+    struct effect_petuna_check {
+        bool can_play(card_ptr origin_card, player_ptr origin);
+        void on_play(card_ptr origin_card, player_ptr origin);
     };
-    DEFINE_EQUIP(petuna, equip_petuna)
+    DEFINE_EFFECT(petuna_check, effect_petuna_check)
+
 }
 
 #endif

@@ -7,6 +7,7 @@
 #include "game/game_table.h"
 #include "game/game_options.h"
 #include "game/request_timer.h"
+#include "game/bot_suggestion.h"
 
 namespace banggame {
 
@@ -24,6 +25,13 @@ namespace banggame {
 
         void on_finished() override {
             pop_request();
+        }
+
+        prompt_string resolve_prompt() const override {
+            if (origin->is_bot() && bot_suggestion::is_target_enemy(origin, hit_target)) {
+                return "BOT_DONT_HEAL_ENEMY";
+            }
+            return {};
         }
 
         void on_resolve() override {
