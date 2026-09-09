@@ -1,22 +1,26 @@
 #include "anezka.h"
 
-#include "game/game_table.h"
+#include "cards/game_events.h"
 
-#include <set>
+#include "game/game_table.h"
 
 namespace banggame {
 
     void equip_anezka::on_enable(card_ptr target_card, player_ptr target) {
-        auto healed_players = std::make_shared<std::set<player_ptr>>();
+        auto used_other = std::make_shared<bool>(false);
 
-        target->m_game->add_listener<event_type::check_anezka_can_heal>(target_card, [target, healed_players](player_ptr origin, player_ptr e_target) -> bool {
-            if (origin != target || e_target == origin) return true;
-            return !healed_players->contains(e_target);
+        target->m_game->add_listener<event_type::on_turn_start>(target_card, [target, used_other](player_ptr origin) {
+            if (origin == target) *used_other = false;
         });
 
-        target->m_game->add_listener<event_type::mark_anezka_healed>(target_card, [target, healed_players](player_ptr origin, player_ptr e_target) {
+        target->m_game->add_listener<event_type::check_anezka_can_heal>(target_card, [target, used_other](player_ptr origin, player_ptr e_target) -> bool {
+            if (origin != target || e_target == origin) return true;
+            return !*used_other;
+        });
+
+        target->m_game->add_listener<event_type::mark_anezka_healed>(target_card, [target, used_other](player_ptr origin, player_ptr e_target) {
             if (origin == target && e_target != origin) {
-                healed_players->insert(e_target);
+                *used_other = true;
             }
         });
     }

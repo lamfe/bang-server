@@ -1,5 +1,6 @@
 #include "patka.h"
 
+#include "cards/game_events.h"
 #include "effects/base/resolve.h"
 #include "effects/base/pick.h"
 
@@ -18,21 +19,49 @@ namespace banggame {
         return false;
     }
 
-    struct request_patka_discard : request_picking, interface_resolvable {
-        request_patka_discard(card_ptr origin_card, player_ptr target)
-            : request_picking(origin_card, nullptr, target) {}
+    void equip_patka::on_enable(card_ptr target_card, player_ptr target) {
+        auto used = std::make_shared<std::array<bool, 2>>();
+        used->fill(false);
 
+        target->m_game->add_listener<event_type::on_turn_start>(target_card, [target, used](player_ptr origin) {
+            if (origin == target) used->fill(false);
+        });
+
+        target->m_game->add_listener<event_type::check_patka_ability>(target_card, [target, used](player_ptr origin, int ability) -> bool {
+            if (origin != target) return true;
+            return !(*used)[ability];
+        });
+
+        target->m_game->add_listener<event_type::mark_patka_used>(target_card, [target, used](player_ptr origin, int ability) {
+            if (origin == target) (*used)[ability] = true;
+        });
+    }
+
+    struct request_patka_discard : request_picking, interface_resolvable {
+        request_patka_discard(card_ptr origin_card, player_ptr target, bool mass_avail, bool discard_avail)
+            : request_picking(origin_card, nullptr, target)
+            , mass_avail(mass_avail), discard_avail(discard_avail) {}
+
+        bool mass_avail;
+        bool discard_avail;
         int discarded = 0;
 
         bool can_pick(card_ptr target_card) const override {
-            return target_card->owner == target && target_card->pocket == pocket_type::player_hand;
+            if (target_card->owner != target || target_card->pocket != pocket_type::player_hand) {
+                return false;
+            }
+            if (discarded == 0) {
+                return (mass_avail && affects_all_players(target_card)) || discard_avail;
+            }
+            return discard_avail;
         }
 
         void on_pick(card_ptr target_card) override {
-            if (discarded == 0 && affects_all_players(target_card)) {
+            if (discarded == 0 && mass_avail && affects_all_players(target_card)) {
                 target->discard_card(target_card);
                 pop_request();
                 target->draw_card(2, origin_card);
+                target->m_game->call_event(event_type::mark_patka_used{target, 0});
                 return;
             }
 
@@ -45,8 +74,11 @@ namespace banggame {
 
         void on_resolve() override {
             pop_request();
-            if (discarded > 1) {
-                target->draw_card(discarded - 1, origin_card);
+            if (discarded > 0) {
+                if (discarded > 1) {
+                    target->draw_card(discarded - 1, origin_card);
+                }
+                target->m_game->call_event(event_type::mark_patka_used{target, 1});
             }
         }
 
@@ -59,8 +91,16 @@ namespace banggame {
         }
     };
 
+    bool effect_patka_discard::can_play(card_ptr origin_card, player_ptr origin) {
+        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0});
+        bool discard_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 1});
+        return (mass_avail || discard_avail) && !origin->empty_hand();
+    }
+
     void effect_patka_discard::on_play(card_ptr origin_card, player_ptr origin) {
-        origin->m_game->queue_request<request_patka_discard>(origin_card, origin);
+        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0});
+        bool discard_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 1});
+        origin->m_game->queue_request<request_patka_discard>(origin_card, origin, mass_avail, discard_avail);
     }
 
 }

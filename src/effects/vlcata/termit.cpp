@@ -30,15 +30,16 @@ namespace banggame {
             return std::nullopt;
         });
 
+        target->m_game->add_listener<event_type::count_generalstore_cards>(target_card, [target](int &value) {
+            if (target->alive()) {
+                ++value;
+            }
+        });
+
         target->m_game->add_listener<event_type::on_play_card>(target_card, [target, target_card](player_ptr origin, card_ptr played_card, const effect_context &ctx) {
             if (played_card->name == "GENERAL_STORE" && target->alive()) {
                 target_card->flash_card();
-                target->m_game->queue_action([target, target_card]{
-                    if (target->alive()) {
-                        target->m_game->top_of_deck()->move_to(pocket_type::selection);
-                        target->draw_card(1, target_card);
-                    }
-                });
+                target->m_game->queue_request<request_generalstore>(played_card, origin, target, effect_flags{});
             }
         });
 

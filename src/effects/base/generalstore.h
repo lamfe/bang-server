@@ -6,6 +6,12 @@
 
 namespace banggame {
 
+    namespace event_type {
+        struct count_generalstore_cards {
+            nullable_ref<int> value;
+        };
+    }
+
     struct request_generalstore : selection_picker {
         using selection_picker::selection_picker;
 

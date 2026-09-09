@@ -8,6 +8,12 @@ namespace banggame {
         void on_enable(card_ptr target_card, player_ptr target);
     };
     DEFINE_EQUIP(terka_p_bang, equip_terka_p_bang)
+
+    struct effect_terka_p_selfheal {
+        bool can_play(card_ptr origin_card, player_ptr origin);
+        void on_play(card_ptr origin_card, player_ptr origin);
+    };
+    DEFINE_EFFECT(terka_p_selfheal, effect_terka_p_selfheal)
 }
 
 #endif

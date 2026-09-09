@@ -17,12 +17,8 @@ namespace banggame {
     }
 
     void equip_krecek::on_enable(card_ptr target_card, player_ptr target) {
-        auto just_lost_weapon = std::make_shared<bool>(false);
-
-        target->m_game->add_listener<event_type::on_discard_any_card>(target_card, [target, just_lost_weapon](player_ptr origin, card_ptr discarded_card) {
+        target->m_game->add_listener<event_type::on_discard_any_card>(target_card, [target](player_ptr origin, card_ptr discarded_card) {
             if (origin == target && discarded_card->has_tag(tag_type::weapon)) {
-                *just_lost_weapon = true;
-
                 target->m_game->queue_action([target]{
                     for (player_ptr other : target->m_game->range_other_players(target)) {
                         if (has_weapon(other) && other->get_weapon_range() > target->get_weapon_range()) {
@@ -36,22 +32,15 @@ namespace banggame {
                         }
                     }
                 }, 40);
-
-                target->m_game->queue_action([just_lost_weapon]{
-                    *just_lost_weapon = false;
-                }, -40);
             }
         });
 
-        target->m_game->add_listener<event_type::on_equip_card>(target_card, [target, target_card, just_lost_weapon](player_ptr origin, player_ptr owner, card_ptr equipped_card, const effect_context &ctx) {
+        target->m_game->add_listener<event_type::on_equip_card>(target_card, [target, target_card](player_ptr origin, player_ptr owner, card_ptr equipped_card, const effect_context &ctx) {
             if (!equipped_card->has_tag(tag_type::weapon)) return;
 
             if (owner == target) {
-                if (*just_lost_weapon) {
-                    *just_lost_weapon = false;
-                    target_card->flash_card();
-                    target->draw_card(1, target_card);
-                }
+                target_card->flash_card();
+                target->draw_card(1, target_card);
             } else if (owner->get_weapon_range() > target->get_weapon_range()) {
                 owner->m_game->add_log("LOG_DISCARDED_SELF_CARD", owner, equipped_card);
                 owner->discard_card(equipped_card);

@@ -22,6 +22,9 @@ namespace banggame {
         void on_finished() override {
             pop_request();
 
+            // No sheriff role exists in 3-player games, so the ability doesn't apply
+            if (origin->m_game->m_players.size() <= 3) return;
+
             auto other_players = rv::filter(origin->m_game->m_players, [origin = origin](player_ptr p) {
                 return p->alive() && p != origin;
             }) | rn::to<std::vector>();
@@ -35,6 +38,12 @@ namespace banggame {
             for (auto [p, role] : rv::zip(other_players, roles)) {
                 p->hide_role();
                 p->set_role(role);
+            }
+
+            int old_max_hp = origin->m_max_hp;
+            origin->m_max_hp = origin->get_character_max_hp();
+            if (origin->m_max_hp > old_max_hp) {
+                origin->heal(origin_card, nullptr, origin->m_max_hp - old_max_hp);
             }
         }
 

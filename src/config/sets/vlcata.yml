@@ -10,16 +10,17 @@ character:
     equip:
       - bejcek
 
-  # 2. PATKA - Once per turn: if the first card he discards has an effect on all players (Saloon etc), he draws 2;
-  #    otherwise he may keep discarding and draws (X-1) cards for the X he discarded
+  # 2. PATKA - Two independent once-per-turn abilities: discard a card with an effect on all players
+  #    (Saloon etc) to draw 2, and/or discard X cards to draw back X-1
   - name: PATKA
     image: 29_patka
     rulesets: [vlcata]
+    equip:
+      - patka
     effects:
-      - max_usages(1)
       - patka_discard
 
-  # 3. ANEZKA - Discard 2 cards to heal any alive player, unlimited times on herself, but each other player only once
+  # 3. ANEZKA - Discard 2 cards to heal any alive player, unlimited times on herself, but at most 1 other player per turn
   - name: ANEZKA
     image: 29_anezka
     rulesets: [vlcata]
@@ -29,12 +30,12 @@ character:
       - discard cards(2) self
       - anezka_heal player alive
  
-  # 4. TERKA_P - Bang can heal (she may flip any hit she deals into a heal) and can discard 3 cards to heal 1 life (Sid Ketchum like)
+  # 4. TERKA_P - Bang can heal (she may flip any hit she deals into a heal) and, only on her turn or when dying, can discard 3 cards to heal 1 life (Sid Ketchum like)
   - name: TERKA_P
     image: 29_terka_p
     responses:
       - discard cards(3) self | hand
-      - heal
+      - terka_p_selfheal
     equip:
       - terka_p_bang
 
@@ -58,13 +59,12 @@ character:
       - none random_if_hand_card notself | hand
     mth_effect: flint_westwood(1,1)
 
-  # 7. VERCA - Once per turn, discard a green-bordered card to draw 2 cards; green cards are already active
+  # 7. VERCA - Discard a green-bordered card to draw 2 cards, no limit; green cards she plays are already active
   - name: VERCA
     image: 29_verca
     equip:
       - verca_instant_green
     effects:
-      - max_usages(1)
       - verca_discard card self | hand
 
   # 8. MARTIN - At the end of turn, draw 1 extra card if not played Bang

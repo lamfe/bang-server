@@ -3,10 +3,12 @@
 #include "cards/game_enums.h"
 #include "effects/base/damage.h"
 #include "effects/base/resolve.h"
+#include "effects/base/death.h"
 
 #include "game/game_table.h"
 #include "game/game_options.h"
 #include "game/request_timer.h"
+#include "game/request_queue.h"
 #include "game/bot_suggestion.h"
 
 namespace banggame {
@@ -50,6 +52,15 @@ namespace banggame {
                 target->m_game->queue_request<request_terka_p_flip>(target_card, target, hit_target, damage);
             }
         });
+    }
+
+    bool effect_terka_p_selfheal::can_play(card_ptr origin_card, player_ptr origin) {
+        return origin->m_game->m_playing == origin
+            || origin->m_game->top_request<request_death>(target_is{origin}) != nullptr;
+    }
+
+    void effect_terka_p_selfheal::on_play(card_ptr origin_card, player_ptr origin) {
+        origin->heal(origin_card, origin, 1);
     }
 
 }
