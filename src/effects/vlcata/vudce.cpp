@@ -1,12 +1,17 @@
 #include "vudce.h"
 
+#include <set>
+
 #include "cards/bang_cards.h"
 #include "cards/filter_enums.h"
 #include "effects/base/pick.h"
+#include "effects/base/resolve.h"
 
 #include "game/game_table.h"
+#include "game/game_options.h"
 
 #include "utils/range_utils.h"
+#include "utils/random_element.h"
 
 namespace banggame {
 
@@ -22,29 +27,71 @@ namespace banggame {
         return make_representative(origin, *it);
     }
 
+    static bool card_expansion_enabled(player_ptr origin, const card_data &data) {
+        for (ruleset_ptr r : data.expansion) {
+            if (!origin->m_game->m_options.expansions.contains(r)) return false;
+        }
+        return true;
+    }
+
     // Every choosable card is a freshly-spawned representative sitting in the shared
     // selection pool, the same way Emporio (General Store) presents its choices.
     static card_list build_nameable_cards(player_ptr origin, card_list &dummies) {
-        static constexpr std::string_view common_names[] = { "BANG", "MISSED", "BEER", "DUEL", "INDIANS", "PANIC", "CAT_BALOU" };
+        static constexpr std::string_view base_names[] = {
+            "BANG", "MISSED", "BEER", "DUEL", "PANIC", "CAT_BALOU", "GENERAL_STORE", "GATLING",
+            "INDIANS", "SALOON", "WELLS_FARGO", "STAGECOACH", "JAIL", "DYNAMITE",
+            "VOLCANIC", "SCHOFIELD", "REMINGTON", "REV_CARABINE", "WINCHESTER",
+            "SCOPE", "MUSTANG"
+        };
 
+        std::set<std::string_view> added;
         card_list choices;
-        for (std::string_view name : common_names) {
+
+        for (std::string_view name : base_names) {
             if (card_ptr c = make_representative_by_name(origin, name)) {
+                choices.push_back(c);
+                dummies.push_back(c);
+                added.insert(name);
+            }
+        }
+
+        // Unlike Helena, who gets every enabled-expansion card, Vudce only gets 1 random
+        // card of each type (brown/blue/green) from whatever expansions are enabled.
+        std::vector<const card_data *> brown_pool, blue_pool, green_pool;
+        for (const card_data &data : bang_cards.deck) {
+            if (!data.expansion.empty() && !added.contains(data.name) && card_expansion_enabled(origin, data)) {
+                if (data.is_brown() && !data.effects.empty()) brown_pool.push_back(&data);
+                else if (data.is_blue()) blue_pool.push_back(&data);
+                else if (data.is_green()) green_pool.push_back(&data);
+            }
+        }
+
+        for (auto *pool : { &brown_pool, &blue_pool, &green_pool }) {
+            if (!pool->empty()) {
+                const card_data *picked = random_element(*pool, origin->m_game->rng);
+                card_ptr c = make_representative(origin, *picked);
                 choices.push_back(c);
                 dummies.push_back(c);
             }
         }
-        for (player_ptr p : origin->m_game->m_players) {
-            for (card_ptr c : p->m_table) {
-                if (c->is_green() || c->has_tag(tag_type::weapon)) {
-                    card_ptr rep = make_representative(origin, *c);
-                    choices.push_back(rep);
-                    dummies.push_back(rep);
-                }
-            }
-        }
+
         return choices;
     }
+
+    struct request_vudce_no_card : request_dismissable {
+        request_vudce_no_card(card_ptr origin_card, player_ptr origin, player_ptr hand_target)
+            : request_dismissable(origin_card, origin, origin), hand_target(hand_target) {}
+
+        player_ptr hand_target;
+
+        game_string status_text(player_ptr owner) const override {
+            if (owner == target) {
+                return {"STATUS_NAMED_CARD_NOT_FOUND", hand_target};
+            } else {
+                return {"STATUS_NAMED_CARD_NOT_FOUND_OTHER", target, hand_target};
+            }
+        }
+    };
 
     struct request_vudce_name : request_picking {
         request_vudce_name(card_ptr origin_card, player_ptr origin, player_ptr hand_target, card_list choices, card_list dummies)
@@ -66,7 +113,7 @@ namespace banggame {
 
             auto it = rn::find(hand_target->m_hand, picked_name, &card::name);
             if (it == hand_target->m_hand.end()) {
-                hand_target->reveal_hand();
+                target->m_game->queue_request<request_vudce_no_card>(origin_card, target, hand_target);
                 return;
             }
 
