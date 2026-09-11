@@ -50,14 +50,14 @@ character:
       - max_hp(9)
 
 
-  # 6. HARRY - Up to 2 times per turn, change 1 card and steal random card from another player
+  # 6. HARRY - Up to 2 times per turn, give away 1 card and steal 1 random card from another player (1-for-1 trade)
   - name: HARRY
     image: 29_harry
     effects:
       - max_usages(2)
       - none card self | hand
       - none random_if_hand_card notself | hand
-    mth_effect: flint_westwood(1,1)
+    mth_effect: harry_swap(1,2)
 
   # 7. VERCA - Discard a green-bordered card to draw 2 cards, no limit; green cards she plays are already active
   - name: VERCA

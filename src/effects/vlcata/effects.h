@@ -3,6 +3,7 @@
 
 #include "ruleset.h"
 #include "anezka.h"
+#include "harry.h"
 #include "horous.h"
 #include "miki.h"
 #include "martin.h"
