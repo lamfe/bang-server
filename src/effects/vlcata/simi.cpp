@@ -29,7 +29,15 @@ namespace banggame {
                 return p->alive() && p != origin;
             }) | rn::to<std::vector>();
 
-            auto roles = other_players | rv::transform(&player::get_base_role) | rn::to<std::vector>();
+            // Roles are drawn from ALL alive players (Simi included), with exactly one
+            // "sheriff" entry removed from the pool -- whoever actually held it, Simi or
+            // not -- so the other players are reshuffled among the remaining non-sheriff
+            // roles and Simi becoming sheriff never produces a second sheriff.
+            auto all_alive = rv::filter(origin->m_game->m_players, &player::alive) | rn::to<std::vector>();
+            auto roles = all_alive | rv::transform(&player::get_base_role) | rn::to<std::vector>();
+            if (auto it = rn::find(roles, player_role::sheriff); it != roles.end()) {
+                roles.erase(it);
+            }
             rn::shuffle(roles, origin->m_game->rng);
 
             origin->hide_role();
@@ -43,7 +51,9 @@ namespace banggame {
             int old_max_hp = origin->m_max_hp;
             origin->m_max_hp = origin->get_character_max_hp();
             if (origin->m_max_hp > old_max_hp) {
-                origin->heal(origin_card, nullptr, origin->m_max_hp - old_max_hp);
+                int delta = origin->m_max_hp - old_max_hp;
+                origin->heal(origin_card, nullptr, delta);
+                origin->draw_card(delta, origin_card);
             }
         }
 

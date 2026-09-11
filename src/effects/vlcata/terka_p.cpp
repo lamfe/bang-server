@@ -33,7 +33,7 @@ namespace banggame {
             if (origin->is_bot() && bot_suggestion::is_target_enemy(origin, hit_target)) {
                 return "BOT_DONT_HEAL_ENEMY";
             }
-            return {};
+            return {"PROMPT_TERKA_P_HEAL", hit_target};
         }
 
         void on_resolve() override {
@@ -52,11 +52,6 @@ namespace banggame {
                 target->m_game->queue_request<request_terka_p_flip>(target_card, target, hit_target, damage);
             }
         });
-    }
-
-    bool effect_terka_p_selfheal::can_play(card_ptr origin_card, player_ptr origin) {
-        return origin->m_game->m_playing == origin
-            || origin->m_game->top_request<request_death>(target_is{origin}) != nullptr;
     }
 
     void effect_terka_p_selfheal::on_play(card_ptr origin_card, player_ptr origin) {

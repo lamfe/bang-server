@@ -27,6 +27,7 @@ namespace banggame {
         pop_request();
         target->m_game->add_log("LOG_DRAWN_FROM_GENERALSTORE", target, target_card, origin_card);
         target->add_to_hand(target_card);
+        target->m_game->call_event(event_type::on_generalstore_pick{ origin, origin_card, target, target_card });
     }
 
     game_string request_generalstore::status_text(player_ptr owner) const {

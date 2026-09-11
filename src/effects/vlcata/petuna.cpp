@@ -16,7 +16,7 @@ namespace banggame {
             : request_resolvable(origin_card, origin, origin) {}
 
         void on_update() override {
-            set_duration(origin->m_game->m_options.auto_resolve_timer);
+            set_duration(origin->m_game->m_options.auto_resolve_timer * 10);
         }
 
         void on_finished() override {
@@ -24,6 +24,9 @@ namespace banggame {
         }
 
         prompt_string resolve_prompt() const override {
+            if (origin->is_bot()) {
+                return {};
+            }
             return "PROMPT_PETUNA_CHECK";
         }
 

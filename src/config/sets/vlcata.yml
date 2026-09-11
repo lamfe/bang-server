@@ -33,7 +33,11 @@ character:
   # 4. TERKA_P - Bang can heal (she may flip any hit she deals into a heal) and, only on her turn or when dying, can discard 3 cards to heal 1 life (Sid Ketchum like)
   - name: TERKA_P
     image: 29_terka_p
+    effects:
+      - discard cards(3) self | hand
+      - terka_p_selfheal
     responses:
+      - deathsave
       - discard cards(3) self | hand
       - terka_p_selfheal
     equip:
@@ -204,7 +208,7 @@ character:
     equip:
       - sitej
 
-  # 28. BUDHA - Whenever he plays an alcohol card, reveals 3 (like Kit Carlson) into his hand to play at will; alcohol chains another 3
+  # 28. BUDHA - Whenever he plays an alcohol card, reveals 3 (like Kit Carlson); unplayable ones are discarded, the rest he must immediately play in an order he picks; alcohol chains another 3
   - name: BUDHA
     image: 29_budha
     equip:
