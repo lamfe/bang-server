@@ -32,6 +32,12 @@ namespace banggame {
         game_ptr g = target->m_game;
         picked->move_to(pocket_type::player_hand, target);
 
+        // If we're already nested inside an outer swap (chained alcohol, or another pick
+        // from the same reveal), m_playing is already target -- don't swap/restore again,
+        // or the restore queued here would fire before the outer one and, since it only
+        // captured "target" as its "old" value, permanently strand m_playing on Budha
+        // instead of the player whose turn it actually is.
+        bool need_restore = g->m_playing != target;
         player_ptr old_playing = g->m_playing;
         g->m_playing = target;
 
@@ -70,9 +76,11 @@ namespace banggame {
             target->discard_card(picked);
         }
 
-        g->queue_action([g, old_playing]{
-            g->m_playing = old_playing;
-        }, -1000);
+        if (need_restore) {
+            g->queue_action([g, old_playing]{
+                g->m_playing = old_playing;
+            }, -1000);
+        }
     }
 
     struct request_budha_play : request_picking {
@@ -120,6 +128,10 @@ namespace banggame {
         if (!target->alive()) return;
 
         game_ptr g = target->m_game;
+        // Same nested-swap guard as force_play_revealed_card: a chained alcohol reveal
+        // triggered from within an already-active Budha resolution must not re-swap/
+        // re-restore, or it strands m_playing on Budha once everything finally unwinds.
+        bool need_restore = g->m_playing != target;
         player_ptr old_playing = g->m_playing;
         g->m_playing = target;
 
@@ -154,9 +166,11 @@ namespace banggame {
             playable = std::move(alcohol_only);
         }
 
-        g->queue_action([g, old_playing]{
-            g->m_playing = old_playing;
-        }, -1000);
+        if (need_restore) {
+            g->queue_action([g, old_playing]{
+                g->m_playing = old_playing;
+            }, -1000);
+        }
 
         if (!playable.empty()) {
             g->queue_request<request_budha_play>(origin_card, target, playable);
