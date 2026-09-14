@@ -139,6 +139,21 @@ namespace banggame {
             }
         }
 
+        // If any of the playable cards is itself alcohol, only it gets resolved (it'll
+        // chain into another reveal of 3) -- the other playable cards from this reveal are
+        // discarded instead of being played alongside it.
+        if (rn::any_of(playable, is_alcohol_card)) {
+            card_list alcohol_only;
+            for (card_ptr c : playable) {
+                if (is_alcohol_card(c)) {
+                    alcohol_only.push_back(c);
+                } else {
+                    target->discard_card(c);
+                }
+            }
+            playable = std::move(alcohol_only);
+        }
+
         g->queue_action([g, old_playing]{
             g->m_playing = old_playing;
         }, -1000);

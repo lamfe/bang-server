@@ -17,6 +17,13 @@ namespace banggame {
             }
         });
 
+        // Only take over as sheriff during genuine initial game setup (m_playing is still
+        // null then, before the very first turn starts) -- not when someone ends up holding
+        // the Simi identity mid-game instead, e.g. via New Identity reassigning it to a
+        // different player, or Vera Custer temporarily copying it. Re-running the reshuffle
+        // in either of those cases would reshuffle everyone's roles all over again.
+        if (target->m_game->m_playing != nullptr) return;
+
         // Runs as a high-priority setup action, queued here during character selection but
         // not actually executed until the whole setup routine (all characters picked, all
         // HP set to their pre-swap max) has returned, and strictly before the default-

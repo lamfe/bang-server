@@ -146,7 +146,7 @@ character:
     equip:
       - cyril
 
-  # 19. VENA - Whenever he takes damage, draw!: hearts negates the life loss
+  # 19. VENA - Whenever he takes damage, draw!: hearts or a 2 negates the life loss
   - name: VENA
     image: 29_vena
     equip:
@@ -212,7 +212,10 @@ character:
     equip:
       - sitej
 
-  # 28. BUDHA - Whenever he plays an alcohol card, reveals 3 (like Kit Carlson); unplayable ones are discarded, the rest he must immediately play in an order he picks; alcohol chains another 3
+  # 28. BUDHA - Whenever he plays an alcohol card, reveals 3 (like Kit Carlson); unplayable
+  #     ones are discarded, and if any of the rest is itself alcohol only it gets played
+  #     (chaining into another reveal of 3), otherwise he must immediately play all of them
+  #     in an order he picks; nobody else can act until he's done
   - name: BUDHA
     image: 29_budha
     equip:
