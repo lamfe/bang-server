@@ -40,23 +40,11 @@ namespace banggame {
     struct request_patka_discard : request_picking, interface_resolvable {
         request_patka_discard(card_ptr origin_card, player_ptr target, bool mass_avail, bool discard_avail)
             : request_picking(origin_card, nullptr, target)
-            , mass_avail(mass_avail), discard_avail(discard_avail)
-        {
-            // Bots must never be left to freely pile up an open-ended discard-X-for-X-1
-            // choice (they always prefer picking another hand card over pressing confirm,
-            // so they'd empty their whole hand). Cap a bot's pile at exactly the cards it
-            // would otherwise have to discard for being over the hand limit, so the
-            // ability only ever converts "unused bad cards" it was going to lose anyway.
-            if (target->is_bot()) {
-                int diff = int(target->m_hand.size()) - target->max_cards_end_of_turn();
-                if (diff > 0) bot_discard_goal = diff;
-            }
-        }
+            , mass_avail(mass_avail), discard_avail(discard_avail) {}
 
         bool mass_avail;
         bool discard_avail;
         int discarded = 0;
-        int bot_discard_goal = 0;
 
         bool can_pick(card_ptr target_card) const override {
             if (target_card->owner != target || target_card->pocket != pocket_type::player_hand) {
@@ -79,7 +67,7 @@ namespace banggame {
 
             target->discard_card(target_card);
             ++discarded;
-            if (target->empty_hand() || (bot_discard_goal > 0 && discarded >= bot_discard_goal)) {
+            if (target->empty_hand()) {
                 on_resolve();
             }
         }
@@ -103,15 +91,11 @@ namespace banggame {
         }
     };
 
-    // Bots only ever consider the mass (discard-on-all-players-card, draw 2) ability on
-    // their own; the open-ended discard-X-for-X-1 ability is bot-eligible only once they're
-    // already over their end-of-turn hand limit, i.e. right when they'd otherwise be forced
-    // to discard those cards for free anyway.
+    // Bots only ever use the mass ability (discard a card that affects all players, draw
+    // 2) -- the open-ended discard-X-for-X-1 ability is never offered to a bot at all,
+    // since letting them freely build that pile is what was locking up the server.
     static bool patka_discard_avail_for(player_ptr origin, bool discard_avail) {
-        if (origin->is_bot()) {
-            return discard_avail && int(origin->m_hand.size()) > origin->max_cards_end_of_turn();
-        }
-        return discard_avail;
+        return discard_avail && !origin->is_bot();
     }
 
     bool effect_patka_discard::can_play(card_ptr origin_card, player_ptr origin) {

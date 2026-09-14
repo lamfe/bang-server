@@ -22,7 +22,7 @@ namespace banggame {
         int amount;
 
         void on_update() override {
-            set_duration(origin->m_game->m_options.auto_resolve_timer);
+            set_duration(origin->m_game->m_options.auto_resolve_timer * 3);
         }
 
         void on_finished() override {

@@ -47,10 +47,6 @@ namespace banggame {
                 }
             });
         }
-
-        game_string status_text(player_ptr owner) const override {
-            return "STATUS_PETUNA_CHECK";
-        }
     };
 
     void equip_petuna::on_enable(card_ptr target_card, player_ptr target) {

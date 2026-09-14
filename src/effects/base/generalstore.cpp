@@ -24,10 +24,13 @@ namespace banggame {
     }
 
     void request_generalstore::on_pick(card_ptr target_card) {
-        pop_request();
         target->m_game->add_log("LOG_DRAWN_FROM_GENERALSTORE", target, target_card, origin_card);
         target->add_to_hand(target_card);
-        target->m_game->call_event(event_type::on_generalstore_pick{ origin, origin_card, target, target_card });
+        if (extra_picks > 0) {
+            --extra_picks;
+        } else {
+            pop_request();
+        }
     }
 
     game_string request_generalstore::status_text(player_ptr owner) const {
@@ -52,6 +55,8 @@ namespace banggame {
     }
 
     void effect_generalstore::on_play(card_ptr origin_card, player_ptr origin, player_ptr target, effect_flags flags, const effect_context &ctx) {
-        origin->m_game->queue_request<request_generalstore>(origin_card, origin, target, flags);
+        int extra_picks = 0;
+        origin->m_game->call_event(event_type::count_generalstore_extra_picks{ target, extra_picks });
+        origin->m_game->queue_request<request_generalstore>(origin_card, origin, target, flags, extra_picks);
     }
 }

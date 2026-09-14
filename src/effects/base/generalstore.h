@@ -10,16 +10,17 @@ namespace banggame {
         struct count_generalstore_cards {
             nullable_ref<int> value;
         };
-        struct on_generalstore_pick {
-            player_ptr origin;
-            card_ptr origin_card;
-            player_ptr target;
-            card_ptr picked_card;
+        struct count_generalstore_extra_picks {
+            const_player_ptr target;
+            nullable_ref<int> value;
         };
     }
 
     struct request_generalstore : selection_picker {
-        using selection_picker::selection_picker;
+        request_generalstore(card_ptr origin_card, player_ptr origin, player_ptr target, effect_flags flags = {}, int extra_picks = 0)
+            : selection_picker(origin_card, origin, target, flags), extra_picks(extra_picks) {}
+
+        int extra_picks;
 
         void on_update() override;
 
@@ -30,7 +31,7 @@ namespace banggame {
 
     struct effect_generalstore {
         prompt_string on_prompt(card_ptr origin_card, player_ptr origin, player_ptr target, effect_flags flags);
-        
+
         void on_play(card_ptr origin_card, player_ptr origin, const effect_context &ctx);
         void on_play(card_ptr origin_card, player_ptr origin, player_ptr target, effect_flags flags, const effect_context &ctx);
     };

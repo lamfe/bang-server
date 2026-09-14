@@ -1,7 +1,5 @@
 #include "termit.h"
 
-#include <set>
-
 #include "cards/game_events.h"
 #include "effects/base/generalstore.h"
 
@@ -38,18 +36,13 @@ namespace banggame {
             }
         });
 
-        // Grant Termit's bonus pick right when his own regular pick comes up in the
-        // Emporio sequence (priority 101 > the default 100 used by the other still-queued
-        // per-player picks), instead of firing it early at the moment General Store is
-        // played, which let him pick out of turn order.
-        auto bonused_stores = std::make_shared<std::set<card_ptr>>();
-        target->m_game->add_listener<event_type::on_generalstore_pick>(target_card,
-            [target, target_card, bonused_stores](player_ptr origin, card_ptr origin_card, player_ptr pick_target, card_ptr picked_card) {
-                if (pick_target == target && target->alive() && origin_card->name == "GENERAL_STORE"
-                    && !bonused_stores->contains(origin_card)) {
-                    bonused_stores->insert(origin_card);
+        // Termit's own Emporio request just picks twice in a row instead of once -- no
+        // separate request needed, so there's no queue-ordering to get wrong.
+        target->m_game->add_listener<event_type::count_generalstore_extra_picks>(target_card,
+            [target, target_card](const_player_ptr pick_target, int &value) {
+                if (pick_target == target && target->alive()) {
                     target_card->flash_card();
-                    target->m_game->queue_request<request_generalstore>(origin_card, origin, target, effect_flags{}, 101);
+                    ++value;
                 }
             });
 

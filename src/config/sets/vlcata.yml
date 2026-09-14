@@ -146,7 +146,7 @@ character:
     equip:
       - cyril
 
-  # 19. VENA - Whenever he takes damage, draw!: hearts or a 2 negates the life loss
+  # 19. VENA - Whenever he takes damage, draw!: hearts negates the life loss
   - name: VENA
     image: 29_vena
     equip:
@@ -159,7 +159,9 @@ character:
       - max_usages(1)
       - helena_ability player not_empty_hand notself
 
-  # 21. SIMI - Becomes Sheriff (roles reshuffled among everyone else) and is immune to Dynamite's damage
+  # 21. SIMI - Starts the game as Sheriff (the original Sheriff and roles among everyone
+  #     else are reshuffled instead), 6 HP and 6 cards from the start, and is immune to
+  #     Dynamite's damage
   - name: SIMI
     image: 29_simi
     equip:
@@ -168,6 +170,8 @@ character:
       - max_usages(1)
       - discard cards(2) self | hand
       - simi_take_dynamite
+    tags:
+      - max_hp(5)
 
   # 22. EL_BAGITO - Draws as many cards as another player draws from Stagecoach, Wells Fargo or Pony Express
   - name: EL_BAGITO
