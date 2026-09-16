@@ -16,7 +16,7 @@ namespace banggame {
             : request_resolvable(origin_card, origin, origin) {}
 
         void on_update() override {
-            set_duration(origin->m_game->m_options.auto_resolve_timer * 10);
+            set_duration(origin->m_game->m_options.auto_resolve_timer * 5);
         }
 
         void on_finished() override {
