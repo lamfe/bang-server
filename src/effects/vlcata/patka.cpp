@@ -8,6 +8,8 @@
 
 #include "game/game_table.h"
 
+#include <algorithm>
+
 namespace banggame {
 
     static bool affects_all_players(card_ptr c) {
@@ -17,6 +19,10 @@ namespace banggame {
             }
         }
         return false;
+    }
+
+    static bool has_all_players_card(player_ptr origin) {
+        return std::ranges::any_of(origin->m_hand, affects_all_players);
     }
 
     void equip_patka::on_enable(card_ptr target_card, player_ptr target) {
@@ -91,21 +97,23 @@ namespace banggame {
         }
     };
 
-    // Bots only ever use the mass ability (discard a card that affects all players, draw
-    // 2) -- the open-ended discard-X-for-X-1 ability is never offered to a bot at all,
-    // since letting them freely build that pile is what was locking up the server.
     static bool patka_discard_avail_for(player_ptr origin, bool discard_avail) {
         return discard_avail && !origin->is_bot();
     }
 
     bool effect_patka_discard::can_play(card_ptr origin_card, player_ptr origin) {
-        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0});
+        if (origin->empty_hand()) return false;
+
+        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0})
+                          && has_all_players_card(origin);
         bool discard_avail = patka_discard_avail_for(origin, origin->m_game->call_event(event_type::check_patka_ability{origin, 1}));
-        return (mass_avail || discard_avail) && !origin->empty_hand();
+
+        return mass_avail || discard_avail;
     }
 
     void effect_patka_discard::on_play(card_ptr origin_card, player_ptr origin) {
-        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0});
+        bool mass_avail = origin->m_game->call_event(event_type::check_patka_ability{origin, 0})
+                          && has_all_players_card(origin);
         bool discard_avail = patka_discard_avail_for(origin, origin->m_game->call_event(event_type::check_patka_ability{origin, 1}));
         origin->m_game->queue_request<request_patka_discard>(origin_card, origin, mass_avail, discard_avail);
     }

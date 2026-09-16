@@ -55,6 +55,9 @@ namespace banggame {
             target->hide_role();
             target->set_role(player_role::sheriff);
 
+            // Set Simi as the player who starts the game
+            g->m_first_player = target;
+
             for (auto [p, role] : rv::zip(other_players, roles)) {
                 p->hide_role();
                 p->set_role(role);
