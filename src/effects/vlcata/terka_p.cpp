@@ -6,20 +6,32 @@
 #include "effects/base/death.h"
 
 #include "game/game_table.h"
+#include "game/game_options.h"
+#include "game/request_timer.h"
 #include "game/request_queue.h"
 #include "game/bot_suggestion.h"
 
 namespace banggame {
 
-    // No timer at all -- this waits indefinitely for an explicit yes/no, since it only
-    // ever fires right after a successful Bang! hit.
-    struct request_terka_p_flip : request_resolvable {
+    // Choice: heal the target, or answer "no" and let the hit stand as normal Bang! damage.
+    // Needs a timer (not just an indefinite wait) so a bot can actually reach its
+    // BOT_DONT_HEAL_ENEMY decline path -- without one there's no "do nothing" option for a
+    // bot to fall back to, and it would always end up healing even an enemy.
+    struct request_terka_p_flip : request_resolvable, request_timer {
         request_terka_p_flip(card_ptr origin_card, player_ptr origin, player_ptr hit_target, int amount)
             : request_resolvable(origin_card, origin, origin)
             , hit_target(hit_target), amount(amount) {}
 
         player_ptr hit_target;
         int amount;
+
+        void on_update() override {
+            set_duration(origin->m_game->m_options.auto_resolve_timer * 3);
+        }
+
+        void on_finished() override {
+            pop_request();
+        }
 
         prompt_string resolve_prompt() const override {
             if (origin->is_bot() && bot_suggestion::is_target_enemy(origin, hit_target)) {
